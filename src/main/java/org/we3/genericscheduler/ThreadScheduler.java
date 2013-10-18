@@ -23,22 +23,20 @@ public class ThreadScheduler {
     /**
      * Time Unit to use, defaults to seconds.
      */
-    TimeUnit unit = TimeUnit.SECONDS;
+    TimeUnit unit;
+
     /**
      * The thread pool for executing the threads
      */
-    ScheduledThreadPoolExecutor executer;
-    /**
-     * Default thread pool size
-     */
-    private int DEFAULTPOOLSIZE = 10;
+    private ScheduledThreadPoolExecutor executor;
 
     /**
-     * Default constructor, use the {@link DEFAULTPOOLSIZE} to make the thread
+     * Default constructor, use the 10 to make the thread
      * pool
      */
     public ThreadScheduler() {
-        newThreadPool(DEFAULTPOOLSIZE);
+        newThreadPool(10);
+        unit = TimeUnit.SECONDS;
     }
 
     /**
@@ -47,6 +45,7 @@ public class ThreadScheduler {
      */
     public ThreadScheduler(int threadPoolSize) {
         newThreadPool(threadPoolSize);
+        unit = TimeUnit.SECONDS;
     }
 
     /**
@@ -56,10 +55,10 @@ public class ThreadScheduler {
      * @param size
      */
     public synchronized void newThreadPool(int size) {
-        if (executer != null) {
-            executer.getQueue().removeAll(executer.getQueue());
+        if (executor != null) {
+            executor.getQueue().removeAll(executor.getQueue());
         }
-        executer = new ScheduledThreadPoolExecutor(size);
+        executor = new ScheduledThreadPoolExecutor(size);
     }
 
     /**
@@ -81,7 +80,7 @@ public class ThreadScheduler {
         checkIfFull();
 
         //Schedule the event once
-        executer.schedule(event, difference, TimeUnit.MILLISECONDS);
+        executor.schedule(event, difference, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -113,7 +112,7 @@ public class ThreadScheduler {
         System.out.println("Scheduling event for " + time);
         //Schedule the recurring event
         //Convert everything to milliseconds to reduce roundoff error.
-        executer.scheduleAtFixedRate(event, difference, TimeUnit.MILLISECONDS.convert(timeBetween, unit), TimeUnit.MILLISECONDS);
+        executor.scheduleAtFixedRate(event, difference, TimeUnit.MILLISECONDS.convert(timeBetween, unit), TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -147,7 +146,7 @@ public class ThreadScheduler {
      * @return 
      */
     public boolean isFull(){
-        return executer.getActiveCount() >= executer.getMaximumPoolSize();
+        return executor.getActiveCount() >= executor.getMaximumPoolSize();
     }
 
     /**
@@ -158,7 +157,7 @@ public class ThreadScheduler {
      * @return
      */
     public boolean isWorking() {
-        return !executer.isShutdown();
+        return !executor.isShutdown();
     }
 
     /**
@@ -167,15 +166,15 @@ public class ThreadScheduler {
      * @param size
      */
     public void reSize(int size) {
-        executer.setCorePoolSize(size);
+        executor.setCorePoolSize(size);
     }
 
     /**
-     * Shutdown the internal threadpool executer. Thread existance is dependent
+     * Shutdown the internal threadpool executor. Thread existance is dependent
      * on the ContinueExistingPeriodicTasksAfterShutdownPolicy
      */
     public void stop() {
-        executer.shutdown();
+        executor.shutdown();
     }
 
     /**
@@ -187,6 +186,6 @@ public class ThreadScheduler {
      * @param value true to continue, else don't
      */
     public void setContinueThreadOnStop(boolean value) {
-        executer.setContinueExistingPeriodicTasksAfterShutdownPolicy(value);
+        executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(value);
     }
 }
