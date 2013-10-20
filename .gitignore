@@ -34,6 +34,8 @@ local.properties
 #iml files
 ./**/*.iml
 
+#mvn build
+target/**
 
 #################
 ## Visual Studio
